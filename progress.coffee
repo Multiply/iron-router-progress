@@ -50,9 +50,9 @@ callbacks =
 	before : ->
 		IronRouterProgress.progress 40
 
-		# XX: Fix me
+		# XX: Fix me - When the `notFoundTemplate` is rendered, no more callbacks are made
 		# We need to detect, if this is the last event called.
-		# I was going to use @stopped, but it's not set yet, but is set in 1ms, if we use setTimeut
+		# I was going to use @stopped, but it's not set yet, but is set in 1ms, if we use setTimeout
 		setTimeout =>
 			IronRouterProgress.done() if @stopped
 		, 1

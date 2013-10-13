@@ -2,6 +2,11 @@ class IronRouterProgress
 	@count : 0
 	@prepare : ->
 		@element = $ """<div id="iron-router-progress"></div>"""
+
+		# When the transition ends, and we're actually done with the progres, simply reset it
+		@element.on 'transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', (e) =>
+			@reset() if @percent >= 100
+
 		$('body').append @element
 
 	@reset : ->
@@ -11,7 +16,7 @@ class IronRouterProgress
 			@element.removeClass 'loading done'
 			@element.css 'width', '0%'
 
-			# Hack to reset the CSS animation
+			# Hack to reset the CSS transition
 			@element[0].offsetWidth = @element[0].offsetWidth
 		++@count
 
@@ -26,31 +31,31 @@ class IronRouterProgress
 	# Used to add 10% or more to the progress meter
 	@progress : (progress = 10) ->
 		@percent += progress
-		
+
 		# If the progress is 100% or more, set it to be done
 		return @done() if @percent >= 100
-		
+
 		@element.css 'width', "#{@percent}%" if @element
 
 	@done : (progress = 10) ->
 		count = @count
 		if @element
 			# Set width to 100% to indicate we're done loading
-			@element.removeClass 'loading'
 			@element.addClass 'done'
+			@element.removeClass 'loading'
 			@element.css 'width', '100%'
-
-			# XX Use the event `animationEnd` instead
-			setTimeout =>
-				# Count each load, so our end timeout won't be called multiple times, when it's loading something else
-				return if count isnt @count
-				@reset()
-			, 1000 * (Router.options.progressSpeed or 1.5)
 
 # Our callbacks, we'll be calling on all routes
 callbacks =
 	before : ->
 		IronRouterProgress.progress 40
+
+		# XX: Fix me
+		# We need to detect, if this is the last event called.
+		# I was going to use @stopped, but it's not set yet, but is set in 1ms, if we use setTimeut
+		setTimeout =>
+			IronRouterProgress.done() if @stopped
+		, 1
 	after : ->
 		IronRouterProgress.done()
 	unload : ->

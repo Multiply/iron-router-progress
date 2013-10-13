@@ -49,13 +49,10 @@ class IronRouterProgress
 # Our callbacks, we'll be calling on all routes
 callbacks =
 	before : ->
-		console.log 'before'
 		IronRouterProgress.progress 40
 	after : ->
-		console.log 'after'
 		IronRouterProgress.done()
 	unload : ->
-		console.log 'unload'
 		IronRouterProgress.reset()
 	waitOn : ->
 		IronRouterProgress.start()

@@ -4,13 +4,12 @@ class IronRouterProgress
 
 		# When the transition ends, and we're actually done with the progres, simply reset it
 		@element.on 'transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', (e) =>
-			@reset() if @percent >= 100
+			@reset() if 0 is Number @element.css 'opacity'
 
 		$('body').append @element
 
 	@reset : ->
 		@percent = 0
-		@alive   = false
 		if @element
 			@element.removeClass 'loading done'
 			@element.css 'width', '0%'
@@ -19,12 +18,8 @@ class IronRouterProgress
 			@element[0].offsetWidth = @element[0].offsetWidth
 
 	@start : ->
-		return if @alive
 		@reset()
-		if @element
-			@alive = true
-			@element.addClass 'loading'
-			@progress()
+		@progress() if @element
 
 	# Used to add 10% or more to the progress meter
 	@progress : (progress = 10) ->
@@ -33,6 +28,8 @@ class IronRouterProgress
 		# If the progress is 100% or more, set it to be done
 		return @done() if @percent >= 100
 
+		@element.addClass 'loading'
+		@element.removeClass 'done'
 		@element.css 'width', "#{@percent}%" if @element
 
 	@done : (progress = 10) ->
@@ -42,10 +39,13 @@ class IronRouterProgress
 			@element.removeClass 'loading'
 			@element.css 'width', '100%'
 
+initialPage = true
+lastAction  = false
+
 # Our callbacks, we'll be calling on all routes
 callbacks =
 	before : ->
-		IronRouterProgress.progress 40
+		IronRouterProgress.progress 20
 
 		# XX: Fix me - When the `notFoundTemplate` is rendered, no more callbacks are made
 		# We need to detect, if this is the last event called.
@@ -53,12 +53,21 @@ callbacks =
 		setTimeout =>
 			IronRouterProgress.done() if @stopped
 		, 1
+		lastAction = 'before'
 	after : ->
 		IronRouterProgress.done()
+		lastAction = 'after'
 	unload : ->
 		IronRouterProgress.reset()
+		initialPage = false
+		lastAction  = 'unload'
 	waitOn : ->
-		IronRouterProgress.start()
+		# If the last action was a `waitOn` or we're at the initial page, simply add progress
+		if lastAction is 'waiton' or (initialPage and lastAction isnt false)
+			IronRouterProgress.progress()
+		else
+			IronRouterProgress.start()
+		lastAction = 'waiton'
 		ready : -> true
 
 # Override iron-router's Router.map and inject our callbacks to all routes

@@ -10,6 +10,9 @@ class IronRouterProgress
 		if @element
 			@element.removeClass 'loading done'
 			@element.css 'width', '0%'
+
+			# Hack to reset the CSS animation
+			@element[0].offsetWidth = @element[0].offsetWidth
 		++@count
 
 	@start : ->

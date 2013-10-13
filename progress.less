@@ -1,0 +1,21 @@
+#iron-router-progress {
+	display          : block;
+	position         : fixed;
+	top              : 0;
+	left             : 0;
+	width            : 0%;
+	height           : 3px;
+	background-color : rgb(170, 242, 0);
+	box-shadow       : 0 0 5px rgba(170, 242, 0, .5);
+	z-index          : 10000;
+	opacity          : 1;
+	
+	&.loading {
+		transition : 1s width;
+	}
+	&.done {
+		opacity : 0;
+		transition : 1s width, 1s opacity;
+		transition-delay: 0s, 1s;
+	}
+}

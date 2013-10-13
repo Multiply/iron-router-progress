@@ -3,9 +3,7 @@
   "description": "Progressbar for iron-router",
   "homepage": "https://github.com/Multiply/iron-router-progress",
   "author": "Jens Ulrich Hjuler Pedersen <multiply@juhp.net> (http://juhp.net)",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "git": "https://github.com/Multiply/iron-router-progress.git",
-  "packages": {
-  	"iron-router": "0.6.0"
-  }
+  "packages": {}
 }

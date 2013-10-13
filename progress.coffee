@@ -1,5 +1,4 @@
 class IronRouterProgress
-	@count : 0
 	@prepare : ->
 		@element = $ """<div id="iron-router-progress"></div>"""
 
@@ -18,7 +17,6 @@ class IronRouterProgress
 
 			# Hack to reset the CSS transition
 			@element[0].offsetWidth = @element[0].offsetWidth
-		++@count
 
 	@start : ->
 		return if @alive
@@ -38,7 +36,6 @@ class IronRouterProgress
 		@element.css 'width', "#{@percent}%" if @element
 
 	@done : (progress = 10) ->
-		count = @count
 		if @element
 			# Set width to 100% to indicate we're done loading
 			@element.addClass 'done'

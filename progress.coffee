@@ -35,19 +35,17 @@ class IronRouterProgress
 	@done : (progress = 10) ->
 		count = @count
 		if @element
+			# Set width to 100% to indicate we're done loading
+			@element.removeClass 'loading'
+			@element.addClass 'done'
+			@element.css 'width', '100%'
+
+			# XX Use the event `animationEnd` instead
 			setTimeout =>
-				# Set width to 100% to indicate we're done loading
-				@element.removeClass 'loading'
-				@element.addClass 'done'
-				@element.css 'width', '100%'
-	
-				@alive = false
-				setTimeout =>
-					# Count each load, so our end timeout won't be called multiple times, when it's loading something else
-					return if count isnt @count
-					@reset()
-				, 1000 * (Router.options.progressSpeed or 1.5)
-			, 1
+				# Count each load, so our end timeout won't be called multiple times, when it's loading something else
+				return if count isnt @count
+				@reset()
+			, 1000 * (Router.options.progressSpeed or 1.5)
 
 # Our callbacks, we'll be calling on all routes
 callbacks =

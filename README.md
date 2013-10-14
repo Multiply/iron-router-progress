@@ -11,10 +11,24 @@ It's mostly all CSS (LESS), and you can pretty much just override the CSS with w
 
 For the most part, you'll want to change the `#iron-router-progress`'s `background-color` and `box-shadow`
 
-If there's specific routes, that you don't want to have a progress bar for, you can do
+By default, the progress bar will tick every 0.75-1.5 seconds, after you start loading a route. If you want to disable this behaviour you can do it either globally by:
+```coffee
+Router.configure
+	disableProgressTick : true
+```
+Or by route definition
+```coffee
+Router.map ->
+	@route 'home',
+		path                : '/'
+		disableProgressTick : true
+```
+
+If there's specific routes, that you don't want to have a progress bar for at all, you can do
 ```coffee
 Router.map ->
 	@route 'home',
 		path            : '/'
 		disableProgress : true
 ```
+You can't disable progress globally, and enable it per route currently, but I'd be happy to implement it, if you guys need it.

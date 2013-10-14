@@ -13,7 +13,9 @@ class IronRouterProgress
 
 		$('body').append @element
 
+	# Resets the transition - Usually called by @start, but can also be called to simply stop the progress
 	@reset : ->
+		clearTimeout @ticker
 		@percent = 0
 		if @element
 			@element.removeClass 'loading done'
@@ -22,14 +24,25 @@ class IronRouterProgress
 			# Hack to reset the CSS transition
 			@element[0].offsetWidth = @element[0].offsetWidth
 
-	@start : ->
-		@reset()
-		@progress() if @element
+	# Starts a new progress
+	# If tick is enabled, it will make fake ticks, every 0.75-1.5 seconds
+	@start : (tick = false) ->
+		if @element
+			@reset()
+			@progress()
+			
+			@tick() if tick
 
-	# Used to add 10% or more to the progress meter
+	@tick : ->
+		@ticker = setTimeout =>
+			@progress()
+			@tick()
+		, Math.random() * 750 + 750
+
+	# Adds `progress` or a random percent to the progress bar
 	@progress : (progress = false) ->
 		# XX We need a better random number generation here
-		@percent += if progress then progress else (100 - @percent) * ((Math.random() * 0.45) + 0.05) | 0
+		@percent += if progress then progress else (100 - @percent) * (Math.random() * 0.45 + 0.05) | 0
 
 		# If the progress is 100% or more, set it to be done
 		return @done() if @percent >= 100
@@ -38,9 +51,11 @@ class IronRouterProgress
 		@element.removeClass 'done'
 		@element.css 'width', "#{@percent}%" if @element
 
-	@done : (progress = 10) ->
+	# Completes the progress by setting the progress to 100%
+	@done : ->
 		if @element
-			# Set width to 100% to indicate we're done loading
+			clearTimeout @ticker
+			@percent = 100
 			@element.addClass 'done'
 			@element.css 'width', '100%'
 
@@ -71,7 +86,8 @@ callbacks =
 		if lastAction is 'waiton' or (initialPage and lastAction isnt false)
 			IronRouterProgress.progress()
 		else
-			IronRouterProgress.start()
+			# Enable ticks by default, and only disable ticks, if they set to true globally, or per route
+			IronRouterProgress.start not (Router.options.disableProgressTick or @options.disableProgressTick)
 		lastAction = 'waiton'
 		ready : -> true
 

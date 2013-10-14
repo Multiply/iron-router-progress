@@ -27,8 +27,9 @@ class IronRouterProgress
 		@progress() if @element
 
 	# Used to add 10% or more to the progress meter
-	@progress : (progress = 10) ->
-		@percent += progress
+	@progress : (progress = false) ->
+		# XX We need a better random number generation here
+		@percent += if progress then progress else (100 - @percent) * ((Math.random() * 0.45) + 0.05) | 0
 
 		# If the progress is 100% or more, set it to be done
 		return @done() if @percent >= 100
@@ -49,7 +50,7 @@ lastAction  = false
 # Our callbacks, we'll be calling on all routes
 callbacks =
 	before : ->
-		IronRouterProgress.progress 20
+		IronRouterProgress.progress()
 
 		# XX: Fix me - When the `notFoundTemplate` is rendered, no more callbacks are made
 		# We need to detect, if this is the last event called.

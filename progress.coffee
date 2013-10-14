@@ -4,7 +4,12 @@ class IronRouterProgress
 
 		# When the transition ends, and we're actually done with the progres, simply reset it
 		@element.on 'transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', (e) =>
-			@reset() if 0 is Number @element.css 'opacity'
+			# Only reset, if this is the last transition
+			# Due to the open nature, of the CSS, I want people to be able to do whatever they like, and as such
+			# simply expecting opacity to reach zero, or specific propertyName to execute won't suffice
+			# A more elegant solution should be added, as not all browsers may support transition-property
+			# witout their vendor prefixes
+			@reset() if e.originalEvent.propertyName is _.last @element.css('transition-property').split ', '
 
 		$('body').append @element
 
@@ -36,7 +41,6 @@ class IronRouterProgress
 		if @element
 			# Set width to 100% to indicate we're done loading
 			@element.addClass 'done'
-			@element.removeClass 'loading'
 			@element.css 'width', '100%'
 
 initialPage = true

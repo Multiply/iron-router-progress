@@ -1,15 +1,15 @@
 class IronRouterProgress
-	@prepare : ->
-		@element = $ """<div id="iron-router-progress"></div>"""
+	@prepare : (spinner = false) ->
+		@element = $ """<div id="iron-router-progress"#{if spinner then ' class="spinner"' else ''}></div>"""
 
 		# When the transition ends, and we're actually done with the progres, simply reset it
 		@element.on 'transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', (e) =>
-			# Only reset, if this is the last transition
+			# Only reset, if this is the last transition, and that it's not a psuedo selector, such as `:before` and `:after`
 			# Due to the open nature, of the CSS, I want people to be able to do whatever they like, and as such
 			# simply expecting opacity to reach zero, or specific propertyName to execute won't suffice
 			# A more elegant solution should be added, as not all browsers may support transition-property
 			# witout their vendor prefixes
-			@reset() if e.originalEvent.propertyName is _.last @element.css('transition-property').split ', '
+			@reset() if e.originalEvent.pseudoElement is '' and e.originalEvent.propertyName is _.last @element.css('transition-property').split ', '
 
 		$('body').append @element
 
@@ -107,4 +107,4 @@ Router.map = (map) ->
 				route.options[type] = cb
 
 # Prepare our DOM-element when jQuery is ready
-$ -> IronRouterProgress.prepare()
+$ -> IronRouterProgress.prepare not Router.options.disableProgressSpinner

@@ -9,7 +9,13 @@ Due to `dev` not having a tag (`0.6.0`) yet, and me not knowing if I can referen
 
 It's mostly all CSS (LESS), and you can pretty much just override the CSS with whatever you want.
 
-For the most part, you'll want to change the `#iron-router-progress`'s `background-color` and `box-shadow`
+For the most part, you'll want to change the `#iron-router-progress`'s `background-color` and `box-shadow` like this:
+```css
+#iron-router-progress {
+	background-color : <COLOR>;
+	box-shadow       : 0 0 5px <COLOR>;
+}
+```
 
 ### Automatic ticks
 By default, the progress bar will tick every 0.75-1.5 seconds, after you start loading a route.
@@ -25,6 +31,22 @@ Router.map ->
 	@route 'home',
 		path                : '/'
 		disableProgressTick : true
+```
+
+### Spinner
+By default, a spinner is running, on the far right of the page, when loading.
+
+You'll most likely want to just change the border-color like this:
+```css
+#iron-router-progress.spinner:before {
+	border-color : <COLOR>;
+}
+```
+
+If you don't like the spinner, simply disable it with:
+```coffee
+Router.configure
+	disableProgressSpinner : true
 ```
 
 ### Disable progress for specific routes

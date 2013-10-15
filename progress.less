@@ -1,12 +1,23 @@
 // Our keyframes, for the spinner
-// XX Add more vendor prefixes
 @-webkit-keyframes iron-router-progress-before {
-	0%   { -webkit-transform: rotate(0deg);   transform : rotate(0deg); }
-	100% { -webkit-transform: rotate(360deg); transform : rotate(360deg); }
+	0%   { -webkit-transform : rotate(0deg);   transform : rotate(0deg); }
+	100% { -webkit-transform : rotate(360deg); transform : rotate(360deg); }
+}
+@-moz-keyframes iron-router-progress-before {
+	0%   { -moz-transform    : rotate(0deg);   transform : rotate(0deg); }
+	100% { -moz-transform    : rotate(360deg); transform : rotate(360deg); }
+}
+@-o-keyframes iron-router-progress-before {
+	0%   { -o-transform      : rotate(0deg);   transform : rotate(0deg); }
+	100% { -o-transform      : rotate(360deg); transform : rotate(360deg); }
+}
+@-ms-keyframes iron-router-progress-before {
+	0%   { -ms-transform     : rotate(0deg);   transform : rotate(0deg); }
+	100% { -ms-transform     : rotate(360deg); transform : rotate(360deg); }
 }
 @keyframes iron-router-progress-before {
-	0%   { transform : rotate(0deg); }
-	100% { transform : rotate(360deg); }
+	0%   {                                     transform : rotate(0deg); }
+	100% {                                     transform : rotate(360deg); }
 }
 
 // Our only real DOM-node, to keep things simple
@@ -24,7 +35,6 @@
 
 	// CSS-only spinner
 	// The spinner only shows, after 0.5 seconds of load time
-	// XX Add more vendor prefixes
 	&.spinner:before {
 		content            : "";
 		display            : block;
@@ -42,6 +52,9 @@
 		transition         : .5s opacity;
 		transition-delay   : .5s;
 		-webkit-animation  : iron-router-progress-before .5s linear infinite;
+		-moz-animation     : iron-router-progress-before .5s linear infinite;
+		-o-animation       : iron-router-progress-before .5s linear infinite;
+		-ms-animation      : iron-router-progress-before .5s linear infinite;
 		animation          : iron-router-progress-before .5s linear infinite;
 	}
 

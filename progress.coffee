@@ -66,13 +66,6 @@ lastAction  = false
 callbacks =
 	before : ->
 		IronRouterProgress.progress()
-
-		# XX: Fix me - When the `notFoundTemplate` is rendered, no more callbacks are made
-		# We need to detect, if this is the last event called.
-		# I was going to use @stopped, but it's not set yet, but is set in 1ms, if we use setTimeout
-		setTimeout =>
-			IronRouterProgress.done() if @stopped
-		, 1
 		lastAction = 'before'
 	after : ->
 		IronRouterProgress.done()
@@ -91,10 +84,20 @@ callbacks =
 		lastAction = 'waiton'
 		ready : -> true
 
+# Override iron-router's IronRouteController.prototype.stop
+# Used for stopping the progress bar from loading endlessly, when calling @stop() inside callbacks
+RouteControllerStopOld = RouteController.prototype.stop
+RouteController.prototype.stop = ->
+	RouteControllerStopOld.call @
+
+	IronRouterProgress.done()
+	lastAction = 'done'
+
 # Override iron-router's Router.map and inject our callbacks to all routes
 RouterMapOld = Router.map
 Router.map = (map) ->
 	RouterMapOld.call @, map
+
 	for route in @routes
 		# If progress is disabled for this route, simply continue
 		continue if route.options.disableProgress

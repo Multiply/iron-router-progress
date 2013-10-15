@@ -1,13 +1,15 @@
+// Our keyframes, for the spinner
+// XX Add more vendor prefixes
 @-webkit-keyframes iron-router-progress-before {
 	0%   { -webkit-transform: rotate(0deg);   transform : rotate(0deg); }
 	100% { -webkit-transform: rotate(360deg); transform : rotate(360deg); }
 }
-
 @keyframes iron-router-progress-before {
 	0%   { transform : rotate(0deg); }
 	100% { transform : rotate(360deg); }
 }
 
+// Our only real DOM-node, to keep things simple
 #iron-router-progress {
 	display          : block;
 	position         : fixed;
@@ -20,6 +22,9 @@
 	opacity          : 1;
 	z-index          : 10000;
 
+	// CSS-only spinner
+	// The spinner only shows, after 0.5 seconds of load time
+	// XX Add more vendor prefixes
 	&.spinner:before {
 		content            : "";
 		display            : block;
@@ -39,7 +44,8 @@
 		-webkit-animation  : iron-router-progress-before .5s linear infinite;
 		animation          : iron-router-progress-before .5s linear infinite;
 	}
-	
+
+	// The transitions are defined here, as we don't want it to fade in (opacity), when the progress starts
 	&.loading {
 		transition       : 1s width, 1s opacity;
 		transition-delay : 0s, 1s;
@@ -47,6 +53,8 @@
 			opacity : 1;
 		}
 	}
+
+	// When we're done, set the opacity of our element, and it's spinner to zero
 	&.done {
 		opacity : 0;
 		&.spinner:before {

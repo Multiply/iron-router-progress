@@ -5,5 +5,10 @@
   "author": "Jens Ulrich Hjuler Pedersen <multiply@juhp.net> (http://juhp.net)",
   "version": "0.1.0",
   "git": "https://github.com/Multiply/iron-router-progress.git",
-  "packages": {}
+  "packages": {
+    "iron-router": {
+      "branch": "dev",
+      "git": "https://github.com/EventedMind/iron-router.git"
+    }
+  }
 }

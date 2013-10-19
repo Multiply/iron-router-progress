@@ -53,36 +53,35 @@ class IronRouterProgress
 
 	# Completes the progress by setting the progress to 100%
 	@done : ->
-		if @element
+		if @element and not @element.hasClass 'done'
 			clearTimeout @ticker
 			@percent = 100
 			@element.addClass 'done'
 			@element.css 'width', '100%'
 
 initialPage = true
-lastAction  = false
+action      = false
 
 # Our callbacks, we'll be calling on all routes
 callbacks =
+	load : ->
+		action = 'load'
+		IronRouterProgress.start not (Router.options.disableProgressTick or @options.disableProgressTick)
 	before : ->
-		IronRouterProgress.progress()
-		lastAction = 'before'
+		action = 'before'
+		@wait ->
+			# XX Fix me - Should we be done here, or only call it in the `after` hook?
+			# If we don't call `done` here, we can use the global hooks, rather than adding them with the hack below
+			IronRouterProgress.done()
+		, ->
+			IronRouterProgress.progress()
+			@stop()
 	after : ->
 		IronRouterProgress.done()
-		lastAction = 'after'
 	unload : ->
-		IronRouterProgress.reset()
+		action      = 'unload'
 		initialPage = false
-		lastAction  = 'unload'
-	waitOn : ->
-		# If the last action was a `waitOn` or we're at the initial page, simply add progress
-		if lastAction is 'waiton' or (initialPage and lastAction isnt false)
-			IronRouterProgress.progress()
-		else
-			# Enable ticks by default, and only disable ticks, if they set to true globally, or per route
-			IronRouterProgress.start not (Router.options.disableProgressTick or @options.disableProgressTick)
-		lastAction = 'waiton'
-		ready : -> true
+		IronRouterProgress.reset()
 
 # Override iron-router's IronRouteController.prototype.stop
 # Used for stopping the progress bar from loading endlessly, when calling @stop() inside callbacks
@@ -90,8 +89,7 @@ RouteControllerStopOld = RouteController.prototype.stop
 RouteController.prototype.stop = ->
 	RouteControllerStopOld.call @
 
-	IronRouterProgress.done()
-	lastAction = 'done'
+	IronRouterProgress.done() if action is 'load'
 
 # Override iron-router's Router.map and inject our callbacks to all routes
 RouterMapOld = Router.map

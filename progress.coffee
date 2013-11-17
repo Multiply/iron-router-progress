@@ -1,6 +1,25 @@
 class IronRouterProgress
-	@prepare : (spinner = false) ->
-		@element = $ """<div id="iron-router-progress"#{if spinner then ' class="spinner"' else ''}></div>"""
+	# Internal variables
+	@percent : 0
+	@isReady : false
+	@isDone  : false
+	@element : false
+
+	# Options
+	@options        : {}
+	@currentOptions : {}
+
+	# Set our @options, by extending our old ones - Can be called multiple times
+	@configure : (options = {}) ->
+		if _.isObject options
+			_.extend @options, options
+			@currentOptions = _.clone @options
+		@
+
+	@prepare : ->
+		return if @isReady
+
+		@element = $ if _.isFunction @options.element then @options.element.call @ else @options.element
 
 		# When the transition ends, and we're actually done with the progres, simply reset it
 		@element.on 'transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', (e) =>
@@ -11,33 +30,37 @@ class IronRouterProgress
 			# witout their vendor prefixes
 			@reset() if e.originalEvent.pseudoElement is '' and e.originalEvent.propertyName is _.last @element.css('transition-property').split ', '
 
+		@isReady = true
 		$('body').append @element
+		@
 
-	# Resets the transition - Usually called by @start, but can also be called to simply stop the progress
+	# Usually called by @start, but can also be called to simply stop the progress
 	@reset : ->
-		clearTimeout @ticker
-		@percent = 0
-		if @element
-			@element.removeClass 'loading done'
-			@element.css 'width', '0%'
-
-			# Hack to reset the CSS transition
-			@element[0].offsetWidth = @element[0].offsetWidth
+		if @isReady
+			clearTimeout @ticker
+			@percent = 0
+			@isDone  = false
+			
+			@currentOptions.reset.call @
+		@
 
 	# Starts a new progress
-	# If tick is enabled, it will make fake ticks, every 0.75-1.5 seconds
-	@start : (tick = false) ->
-		if @element
+	@start : (options = {}) ->
+		@currentOptions = _.extend {}, @options, options if _.isObject options
+
+		if @isReady
 			@reset()
 			@progress()
 			
-			@tick() if tick
+			@tick() if @currentOptions.tick
+		@
 
 	@tick : ->
 		@ticker = setTimeout =>
 			@progress()
 			@tick()
 		, Math.random() * 750 + 750
+		@
 
 	# Adds `progress` or a random percent to the progress bar
 	@progress : (progress = false) ->
@@ -47,17 +70,46 @@ class IronRouterProgress
 		# If the progress is 100% or more, set it to be done
 		return @done() if @percent >= 100
 
-		@element.addClass 'loading'
-		@element.removeClass 'done'
-		@element.css 'width', "#{@percent}%" if @element
+		@currentOptions.progress.call @
+		@
 
 	# Completes the progress by setting the progress to 100%
 	@done : ->
-		if @element and not @element.hasClass 'done'
+		if @isReady and not @isDone
 			clearTimeout @ticker
+
 			@percent = 100
-			@element.addClass 'done'
-			@element.css 'width', '100%'
+			@isDone  = true
+
+			@currentOptions.done.call @
+		@
+
+# Default options
+IronRouterProgress.configure
+	element : -> """<div id="iron-router-progress"#{if @options.spinner then ' class="spinner"' else ''}></div>"""
+	spinner : true
+	tick    : true
+	
+	# Callbacks
+	# Resets the transition
+	reset : ->
+		@element.removeClass 'loading done'
+		@element.css 'width', '0%'
+
+		# Hack to reset the CSS transition
+		@element[0].offsetWidth = @element[0].offsetWidth
+		@
+
+	progress : ->
+		@element.addClass 'loading'
+		@element.removeClass 'done'
+		@element.css 'width', "#{@percent}%" if @element
+		@
+
+	done : ->
+		@element.addClass 'done'
+		@element.css 'width', '100%'
+		@
 
 initialPage = true
 action      = false
@@ -66,35 +118,41 @@ action      = false
 callbacks =
 	load : ->
 		action = 'load'
-		IronRouterProgress.start not (Router.options.disableProgressTick or @options.disableProgressTick)
+		# Take the options from the route, if any
+		IronRouterProgress.start @options.progress or {}
+		@
 	before : ->
 		action = 'before'
-		@wait ->
-			# XX Fix me - Should we be done here, or only call it in the `after` hook?
-			# If we don't call `done` here, we can use the global hooks, rather than adding them with the hack below
+		if @ready()
 			IronRouterProgress.done()
-		, ->
+		else
 			IronRouterProgress.progress()
 			@stop()
+		@
 	after : ->
 		IronRouterProgress.done()
+		@
 	unload : ->
 		action      = 'unload'
 		initialPage = false
 		IronRouterProgress.reset()
+		@
 
 # Override iron-router's IronRouteController.prototype.stop
 # Used for stopping the progress bar from loading endlessly, when calling @stop() inside callbacks
 RouteControllerStopOld = RouteController.prototype.stop
 RouteController.prototype.stop = ->
-	RouteControllerStopOld.call @
+	result = RouteControllerStopOld.call @
 
 	IronRouterProgress.done() if action is 'load'
+
+	# Return the original result, if any
+	result
 
 # Override iron-router's Router.map and inject our callbacks to all routes
 RouterMapOld = Router.map
 Router.map = (map) ->
-	RouterMapOld.call @, map
+	result = RouterMapOld.call @, map
 
 	for route in @routes
 		# If progress is disabled for this route, simply continue
@@ -107,5 +165,8 @@ Router.map = (map) ->
 			else
 				route.options[type] = cb
 
+	# Return the original result, if any
+	result
+
 # Prepare our DOM-element when jQuery is ready
-$ -> IronRouterProgress.prepare not Router.options.disableProgressSpinner
+$ -> IronRouterProgress.prepare()

@@ -15,4 +15,6 @@ Package.on_use(function (api) {
 		'progress.coffee',
 		'progress.less'
 	], 'client');
+	
+	api.export('IronRouterProgress', 'client');
 });

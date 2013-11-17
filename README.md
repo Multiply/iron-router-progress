@@ -3,8 +3,6 @@
 Implements a simple progress bar, when loading different routes.
 Example running at: https://iron-router-progress.meteor.com/
 
-Remember to use the `dev` branch of https://github.com/EventedMind/iron-router
-
 ## Customization
 
 It's mostly all CSS (LESS), and you can pretty much just override the CSS with whatever you want.

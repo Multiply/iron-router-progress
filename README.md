@@ -3,6 +3,13 @@
 Implements a simple progress bar, when loading different routes.
 Example running at: https://iron-router-progress.meteor.com/
 
+## Installation
+
+Using [Meteorite](https://github.com/oortcloud/meteorite) to install the latest version from [Atmosphere](https://atmosphere.meteor.com/):
+```sh
+$ mrt add iron-router-progress
+```
+
 ## Customization
 
 It's mostly all CSS (LESS), and you can pretty much just override the CSS with whatever you want.

@@ -50,8 +50,7 @@ You'll most likely want to just change the border-color like this:
 
 If you don't like the spinner, simply disable it with:
 ```coffee
-Router.configure
-	disableProgressSpinner : true
+IronRouterProgress.configure(spinner: false)()
 ```
 
 ### Disable progress for specific routes

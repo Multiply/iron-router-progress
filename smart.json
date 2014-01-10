@@ -6,6 +6,9 @@
   "version": "0.2.0",
   "git": "https://github.com/Multiply/iron-router-progress.git",
   "packages": {
-    "iron-router": {}
+    "iron-router": {
+      "git": "https://github.com/EventedMind/iron-router.git",
+      "branch": "shark"
+    }
   }
 }

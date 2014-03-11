@@ -121,13 +121,16 @@ callbacks =
 		# Take the options from the route, if any
 		IronRouterProgress.start @options.progress or {}
 		@
-	before : ->
+	before : (pause)->
 		action = 'before'
 		if @ready()
 			IronRouterProgress.done()
 		else
 			IronRouterProgress.progress()
-			@stop()
+			if _.isFunction(pause)
+        pause()
+      else
+        this.stop()
 		@
 	after : ->
 		IronRouterProgress.done()

@@ -7,7 +7,7 @@ Example running at: https://iron-router-progress.meteor.com/
 
 Using [Meteorite](https://github.com/oortcloud/meteorite) to install the latest version from [Atmosphere](https://atmosphere.meteor.com/):
 ```sh
-$ mrt install iron-router-progress
+$ mrt add iron-router-progress
 ```
 
 ## Customization

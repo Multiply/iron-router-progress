@@ -4,11 +4,5 @@
   "homepage": "https://github.com/Multiply/iron-router-progress",
   "author": "Jens Ulrich Hjuler Pedersen <multiply@juhp.net> (http://juhp.net)",
   "version": "0.2.0",
-  "git": "https://github.com/Multiply/iron-router-progress.git",
-  "packages": {
-    "iron-router": {
-      "git": "https://github.com/EventedMind/iron-router.git",
-      "branch": "blaze-integration"
-    }
-  }
+  "git": "https://github.com/Multiply/iron-router-progress.git"
 }

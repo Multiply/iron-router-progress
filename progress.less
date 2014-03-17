@@ -51,11 +51,6 @@
 		z-index            : 10000;
 		transition         : .5s opacity;
 		transition-delay   : .5s;
-		-webkit-animation  : iron-router-progress-before .5s linear infinite;
-		-moz-animation     : iron-router-progress-before .5s linear infinite;
-		-o-animation       : iron-router-progress-before .5s linear infinite;
-		-ms-animation      : iron-router-progress-before .5s linear infinite;
-		animation          : iron-router-progress-before .5s linear infinite;
 	}
 
 	// The transitions are defined here, as we don't want it to fade in (opacity), when the progress starts
@@ -64,6 +59,11 @@
 		transition-delay : 0s, 1s;
 		&.spinner:before {
 			opacity : 1;
+			-webkit-animation  : iron-router-progress-before .5s linear infinite;
+			-moz-animation     : iron-router-progress-before .5s linear infinite;
+			-o-animation       : iron-router-progress-before .5s linear infinite;
+			-ms-animation      : iron-router-progress-before .5s linear infinite;
+			animation          : iron-router-progress-before .5s linear infinite;
 		}
 	}
 

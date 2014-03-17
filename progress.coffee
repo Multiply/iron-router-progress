@@ -111,12 +111,12 @@ IronRouterProgress.configure
 		@element.css 'width', '100%'
 		@
 
-Router.load ->
+Router.onRun ->
 	# Take the options from the route, if any
 	IronRouterProgress.start @route.options?.progress or {}
 	@
 
-Router.before (pause) ->
+Router.onBeforeAction (pause) ->
 	if @ready()
 		IronRouterProgress.done()
 	else
@@ -127,11 +127,11 @@ Router.before (pause) ->
 			@stop()
 	@
 
-Router.after ->
+Router.onAfterAction ->
 	IronRouterProgress.done()
 	@
 
-Router.unload ->
+Router.onStop ->
 	IronRouterProgress.reset()
 	@
 

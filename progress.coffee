@@ -89,7 +89,7 @@ IronRouterProgress.configure
 	element : -> """<div id="iron-router-progress"#{if @options.spinner then ' class="spinner"' else ''}></div>"""
 	spinner : true
 	tick    : true
-	
+
 	# Callbacks
 	# Resets the transition
 	reset : ->
@@ -111,68 +111,29 @@ IronRouterProgress.configure
 		@element.css 'width', '100%'
 		@
 
-initialPage = true
-action      = false
+Router.load ->
+	# Take the options from the route, if any
+	IronRouterProgress.start @route.options?.progress or {}
+	@
 
-# Our callbacks, we'll be calling on all routes
-callbacks =
-	load : ->
-		action = 'load'
-		# Take the options from the route, if any
-		IronRouterProgress.start @options.progress or {}
-		@
-	before : (pause)->
-		action = 'before'
-		if @ready()
-			IronRouterProgress.done()
-		else
-			IronRouterProgress.progress()
-			if _.isFunction pause
-				pause()
-			else
-				this.stop()
-		@
-	after : ->
+Router.before (pause) ->
+	if @ready()
 		IronRouterProgress.done()
-		@
-	unload : ->
-		action      = 'unload'
-		initialPage = false
-		IronRouterProgress.reset()
-		@
+	else
+		IronRouterProgress.progress()
+		if _.isFunction pause
+			pause()
+		else
+			@stop()
+	@
 
-# Override iron-router's IronRouteController.prototype.stop
-# Used for stopping the progress bar from loading endlessly, when calling @stop() inside callbacks
-RouteControllerStopOld = RouteController.prototype.stop
-RouteController.prototype.stop = ->
-	result = RouteControllerStopOld.call @
+Router.after ->
+	IronRouterProgress.done()
+	@
 
-	IronRouterProgress.done() if action is 'load'
-
-	# Return the original result, if any
-	result
-
-# Override iron-router's Router.map and inject our callbacks to all routes
-RouterMapOld = Router.map
-Router.map = (map) ->
-	result = RouterMapOld.call @, map
-
-	for route in @routes
-		# If progress is disabled for this route, simply continue
-		continue if route.options.disableProgress
-		for type, cb of callbacks
-			if _.isArray route.options[type]
-				route.options[type].push cb
-			else if _.isFunction route.options[type]
-				route.options[type] = [route.options[type], cb]
-			else
-				route.options[type] = cb
-
-	# Return the original result, if any
-	result
+Router.unload ->
+	IronRouterProgress.reset()
+	@
 
 # Prepare our DOM-element when jQuery is ready
-$ ->
-	IronRouterProgress.prepare()
-	console.log 'Loaded?'
-
+$ -> IronRouterProgress.prepare()

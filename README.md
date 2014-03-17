@@ -7,7 +7,7 @@ Example running at: https://iron-router-progress.meteor.com/
 
 Using [Meteorite](https://github.com/oortcloud/meteorite) to install the latest version from [Atmosphere](https://atmosphere.meteor.com/):
 ```sh
-$ mrt add iron-router-progress
+$ mrt install iron-router-progress
 ```
 
 ## Customization
@@ -27,15 +27,16 @@ By default, the progress bar will tick every 0.75-1.5 seconds, after you start l
 
 If you want to disable this behaviour you can do it either globally by:
 ```coffee
-Router.configure
-	disableProgressTick : true
+IronRouterProgress.configure
+	tick : false
 ```
 Or by route definition:
 ```coffee
 Router.map ->
 	@route 'home',
-		path                : '/'
-		disableProgressTick : true
+		path     : '/'
+		progress :
+			tick : false
 ```
 
 ### Spinner
@@ -50,8 +51,8 @@ You'll most likely want to just change the border-color like this:
 
 If you don't like the spinner, simply disable it with:
 ```coffee
-Router.configure
-	disableProgressSpinner : true
+IronRouterProgress.configure
+	spinner : false
 ```
 
 ### Disable progress for specific routes
@@ -59,7 +60,8 @@ If there's specific routes, that you don't want to have a progress bar for at al
 ```coffee
 Router.map ->
 	@route 'home',
-		path            : '/'
-		disableProgress : true
+		path     : '/'
+		progress :
+			spinner : false
 ```
 You can't disable progress globally, and enable it per route currently, but I'd be happy to implement it, if you guys need it.

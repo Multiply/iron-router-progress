@@ -86,7 +86,7 @@ class IronRouterProgress
 
 # Default options
 IronRouterProgress.configure
-	element : -> """<div id="iron-router-progress"#{if @options.spinner then ' class="spinner"' else ''}></div>"""
+	element : """<div id="iron-router-progress"></div>"""
 	spinner : true
 	tick    : true
 
@@ -95,6 +95,7 @@ IronRouterProgress.configure
 	reset : ->
 		@element.removeClass 'loading done'
 		@element.css 'width', '0%'
+		@element.toggleClass 'spinner', @currentOptions.spinner
 
 		# Hack to reset the CSS transition
 		@element[0].offsetWidth = @element[0].offsetWidth

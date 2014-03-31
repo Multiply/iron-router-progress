@@ -50,9 +50,10 @@ class IronRouterProgress
 
 		if @isReady
 			@reset()
-			@progress()
+			if @currentOptions.enabled
+				@progress()
 			
-			@tick() if @currentOptions.tick
+				@tick() if @currentOptions.tick
 		@
 
 	@tick : ->
@@ -89,6 +90,7 @@ IronRouterProgress.configure
 	element : """<div id="iron-router-progress"></div>"""
 	spinner : true
 	tick    : true
+	enabled : true
 
 	# Callbacks
 	# Resets the transition

@@ -5,7 +5,7 @@ Example running at: https://iron-router-progress.meteor.com/
 
 ## Installation
 
-Using [Meteorite](https://github.com/oortcloud/meteorite) to install the latest version from [Atmosphere](https://atmosphere.meteor.com/):
+Use [Atmosphere](https://atmospherejs.com/) to install the latest version of iron-router-progress.
 ```sh
 $ mrt add iron-router-progress
 ```
@@ -54,9 +54,7 @@ If you don't like the spinner, simply disable it with:
 IronRouterProgress.configure
 	spinner : false
 ```
-
-### Disable progress for specific routes
-If there's specific routes, that you don't want to have a progress bar for at all, you can do:
+Or by route definition:
 ```coffee
 Router.map ->
 	@route 'home',
@@ -64,4 +62,25 @@ Router.map ->
 		progress :
 			spinner : false
 ```
-You can't disable progress globally, and enable it per route currently, but I'd be happy to implement it, if you guys need it.
+
+### Enable the progress bar, only for certain routes
+If you don't want to use the progress bar for all routes, you can disable it globally, and enable it on the route level:
+```coffee
+IronRouterProgress.configure
+	enabled : false
+
+Router.map ->
+	@route 'home',
+		path     : '/'
+		progress :
+			enabled : true
+```
+
+Or if you just want it disabled for certain routes:
+```coffee
+Router.map ->
+	@route 'home',
+		path     : '/'
+		progress :
+			enabled : false
+```

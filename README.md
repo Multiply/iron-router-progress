@@ -84,3 +84,32 @@ Router.map ->
 		progress :
 			enabled : false
 ```
+
+### Delay the progress from showing up on fast routes
+If you don't want to see the progress-bar for 'fast' routes, you can set a delay (time in ms) in which you would like for the progress to wait, before showing up.
+Global delay:
+```coffee
+IronRouterProgress.configure
+	delay : 100
+```
+
+Or per route:
+```coffee
+Router.map ->
+	@route 'home',
+		path     : '/'
+		progress :
+			delay : 100
+```
+
+You can enable it globally, and disable it for specific routes like this:
+```coffee
+IronRouterProgress.configure
+	delay : 100
+
+Router.map ->
+	@route 'home',
+		path     : '/'
+		progress :
+			delay : false
+```

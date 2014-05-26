@@ -4,6 +4,7 @@ class IronRouterProgress
 	@isReady : false
 	@isDone  : false
 	@element : false
+	@delay   : false
 
 	# Options
 	@options        : {}
@@ -38,6 +39,7 @@ class IronRouterProgress
 	@reset : ->
 		if @isReady
 			clearTimeout @ticker
+			clearTimeout @delay
 			@percent = 0
 			@isDone  = false
 			
@@ -51,10 +53,20 @@ class IronRouterProgress
 		if @isReady
 			@reset()
 			if @currentOptions.enabled
-				@progress()
-			
-				@tick() if @currentOptions.tick
+				# If we have a delay set, wait with running _start
+				if @currentOptions.delay and @currentOptions.delay > 0
+					@delay = setTimeout =>
+						@_start()
+					, @currentOptions.delay
+				else
+					@_start()
 		@
+
+	@_start : ->
+		@delay = false
+		@progress()
+
+		@tick() if @currentOptions.tick
 
 	@tick : ->
 		@ticker = setTimeout =>
@@ -68,6 +80,9 @@ class IronRouterProgress
 		# XX We need a better random number generation here
 		@percent += if progress then progress else (100 - @percent) * (Math.random() * 0.45 + 0.05) | 0
 
+		# If we have a delay, simply return past this point
+		return if @delay
+
 		# If the progress is 100% or more, set it to be done
 		return @done() if @percent >= 100
 
@@ -76,6 +91,10 @@ class IronRouterProgress
 
 	# Completes the progress by setting the progress to 100%
 	@done : ->
+		if @delay
+			clearTimeout @delay
+			@delay = false
+
 		if @isReady and not @isDone
 			clearTimeout @ticker
 
@@ -91,6 +110,7 @@ IronRouterProgress.configure
 	spinner : true
 	tick    : true
 	enabled : true
+	delay   : false
 
 	# Callbacks
 	# Resets the transition

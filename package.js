@@ -1,5 +1,5 @@
 Package.describe({
-	version : '0.9.1',
+	version : '0.9.2',
 	summary : 'Progressbar for iron:router',
 	git     : 'https://github.com/Multiply/iron-router-progress.git'
 });

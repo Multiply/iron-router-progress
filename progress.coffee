@@ -12,14 +12,12 @@ class IronRouterProgress
 
 	# Set our @options, by extending our old ones - Can be called multiple times
 	@configure : (options = {}) ->
-		console.log 'configure'
 		if _.isObject options
 			_.extend @options, options
 			@currentOptions = _.clone @options
 		@
 
 	@prepare : ->
-		console.log 'prepare'
 		return if @isReady
 
 		@element = $ if _.isFunction @options.element then @options.element.call @ else @options.element
@@ -39,7 +37,6 @@ class IronRouterProgress
 
 	# Usually called by @start, but can also be called to simply stop the progress
 	@reset : ->
-		console.log 'reset'
 		if @isReady
 			clearTimeout @ticker
 			clearTimeout @delay
@@ -51,7 +48,6 @@ class IronRouterProgress
 
 	# Starts a new progress
 	@start : (options = {}) ->
-		console.log 'start'
 		@currentOptions = _.extend {}, @options, options if _.isObject options
 
 		if @isReady
@@ -67,14 +63,12 @@ class IronRouterProgress
 		@
 
 	@_start : ->
-		console.log '_start'
 		@delay = false
 		@progress()
 
 		@tick() if @currentOptions.tick
 
 	@tick : ->
-		console.log 'tick'
 		@ticker = setTimeout =>
 			@progress()
 			@tick()
@@ -100,7 +94,6 @@ class IronRouterProgress
 
 	# Completes the progress by setting the progress to 100%
 	@done : ->
-		console.log 'done'
 		if @delay
 			clearTimeout @delay
 			@delay = false

@@ -12,12 +12,14 @@ class IronRouterProgress
 
 	# Set our @options, by extending our old ones - Can be called multiple times
 	@configure : (options = {}) ->
+		console.log 'configure'
 		if _.isObject options
 			_.extend @options, options
 			@currentOptions = _.clone @options
 		@
 
 	@prepare : ->
+		console.log 'prepare'
 		return if @isReady
 
 		@element = $ if _.isFunction @options.element then @options.element.call @ else @options.element
@@ -37,6 +39,7 @@ class IronRouterProgress
 
 	# Usually called by @start, but can also be called to simply stop the progress
 	@reset : ->
+		console.log 'reset'
 		if @isReady
 			clearTimeout @ticker
 			clearTimeout @delay
@@ -48,6 +51,7 @@ class IronRouterProgress
 
 	# Starts a new progress
 	@start : (options = {}) ->
+		console.log 'start'
 		@currentOptions = _.extend {}, @options, options if _.isObject options
 
 		if @isReady
@@ -63,12 +67,14 @@ class IronRouterProgress
 		@
 
 	@_start : ->
+		console.log '_start'
 		@delay = false
 		@progress()
 
 		@tick() if @currentOptions.tick
 
 	@tick : ->
+		console.log 'tick'
 		@ticker = setTimeout =>
 			@progress()
 			@tick()
@@ -77,6 +83,9 @@ class IronRouterProgress
 
 	# Adds `progress` or a random percent to the progress bar
 	@progress : (progress = false) ->
+		# Don't tick, if we're not enabled, or there's an active delay
+		return @ if not @currentOptions.enabled
+
 		# XX We need a better random number generation here
 		@percent += if progress then progress else (100 - @percent) * (Math.random() * 0.45 + 0.05) | 0
 
@@ -91,6 +100,7 @@ class IronRouterProgress
 
 	# Completes the progress by setting the progress to 100%
 	@done : ->
+		console.log 'done'
 		if @delay
 			clearTimeout @delay
 			@delay = false
@@ -144,10 +154,14 @@ Router.onBeforeAction (pause) ->
 		IronRouterProgress.done()
 	else
 		IronRouterProgress.progress()
-		if _.isFunction pause
-			pause()
-		else
-			@stop()
+
+		# XX Temporary fix, when you want to show your loading template
+		loadingTemplate = @lookupProperty 'loadingTemplate'
+		if loadingTemplate
+			@render loadingTemplate
+			@renderRegions()
+
+		pause()
 	@
 
 Router.onAfterAction ->

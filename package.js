@@ -1,17 +1,19 @@
 Package.describe({
-	summary: 'Progressbar for iron-router'
+	version : '0.9.0',
+	summary : 'Progressbar for iron:router',
+	git     : 'https://github.com/Multiply/iron-router-progress.git'
 });
 
-Package.on_use(function (api) {
+Package.onUse(function (api) {
 	api.use([
-		'coffeescript',
-		'less',
-		'jquery',
-		'underscore',
-		'iron-router'
+		'coffeescript@1.0.0',
+		'less@1.0.0',
+		'jquery@1.0.0',
+		'underscore@1.0.0',
+		'iron:router@0.9.1'
 	], 'client');
 
-	api.add_files([
+	api.addFiles([
 		'progress.coffee',
 		'progress.less'
 	], 'client');

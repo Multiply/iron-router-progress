@@ -1,5 +1,5 @@
 Package.describe({
-	version : '0.9.0',
+	version : '0.9.1',
 	summary : 'Progressbar for iron:router',
 	git     : 'https://github.com/Multiply/iron-router-progress.git'
 });
@@ -12,6 +12,8 @@ Package.onUse(function (api) {
 		'underscore@1.0.0',
 		'iron:router@0.9.1'
 	], 'client');
+
+	api.imply('iron:router');
 
 	api.addFiles([
 		'progress.coffee',

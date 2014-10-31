@@ -1,7 +1,7 @@
 # Default progress options
 Router.configure
 	progress        : true
-	progressDebug   : true
+	progressDebug   : false
 	progressDelay   : false
 	progressSpinner : true
 	progressTick    : true

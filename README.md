@@ -3,11 +3,17 @@
 Implements a simple progress bar, when loading different routes.
 Example running at: https://iron-router-progress.meteor.com/
 
+## Upgrading to Meteor 1.0
+
+__Please note:__ From version 1.0 and onwards, you have to use `multiply:iron-router-progress` instead of `mrt:iron-router-progress`.
+
+The IronRouterProgress global has been removed. You now configure IRP using Router.configure, or on the route options object. See below, on how to do that.
+
 ## Installation
 
 Use [Atmosphere](https://atmospherejs.com/) to install the latest version of iron-router-progress.
 ```sh
-$ mrt add iron-router-progress
+$ meteor add multiply:iron-router-progress
 ```
 
 ## Customization
@@ -27,16 +33,13 @@ By default, the progress bar will tick every 0.75-1.5 seconds, after you start l
 
 If you want to disable this behaviour you can do it either globally by:
 ```coffee
-IronRouterProgress.configure
-	tick : false
+Router.configure
+	progressTick : false
 ```
 Or by route definition:
 ```coffee
-Router.map ->
-	@route 'home',
-		path     : '/'
-		progress :
-			tick : false
+Router.route '/example',
+	progressTick : false
 ```
 
 ### Spinner
@@ -51,65 +54,50 @@ You'll most likely want to just change the border-color like this:
 
 If you don't like the spinner, simply disable it with:
 ```coffee
-IronRouterProgress.configure
-	spinner : false
+Router.configure
+	progressSpinner : false
 ```
 Or by route definition:
 ```coffee
-Router.map ->
-	@route 'home',
-		path     : '/'
-		progress :
-			spinner : false
+Router.route '/example',
+	progressSpinner : false
 ```
 
 ### Enable the progress bar, only for certain routes
 If you don't want to use the progress bar for all routes, you can disable it globally, and enable it on the route level:
 ```coffee
-IronRouterProgress.configure
-	enabled : false
+Router.configure
+	progress : false
 
-Router.map ->
-	@route 'home',
-		path     : '/'
-		progress :
-			enabled : true
+Router.route '/example',
+	progressEnabled : true
 ```
 
 Or if you just want it disabled for certain routes:
 ```coffee
-Router.map ->
-	@route 'home',
-		path     : '/'
-		progress :
-			enabled : false
+Router.route '/example',
+	progress : false
 ```
 
 ### Delay the progress from showing up on fast routes
 If you don't want to see the progress-bar for 'fast' routes, you can set a delay (time in ms) in which you would like for the progress to wait, before showing up.
 Global delay:
 ```coffee
-IronRouterProgress.configure
-	delay : 100
+Router.configure
+	progressDelay : 100
 ```
 
 Or per route:
 ```coffee
-Router.map ->
-	@route 'home',
-		path     : '/'
-		progress :
-			delay : 100
+Router.route '/example',
+	progressDelay : 100
 ```
 
 You can enable it globally, and disable it for specific routes like this:
 ```coffee
-IronRouterProgress.configure
-	delay : 100
+Router.configure
+	progressDelay : 100
 
-Router.map ->
-	@route 'home',
-		path     : '/'
-		progress :
-			delay : false
+Router.route '/example',
+	progressDelay : false
 ```

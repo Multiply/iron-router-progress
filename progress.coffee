@@ -1,169 +1,218 @@
-class IronRouterProgress
-	# Internal variables
-	@percent : 0
-	@isReady : false
-	@isDone  : false
-	@element : false
-	@delay   : false
+# Default progress options
+Router.configure
+	progress        : true
+	progressDebug   : true
+	progressDelay   : false
+	progressSpinner : true
+	progressTick    : true
 
-	# Options
-	@options        : {}
-	@currentOptions : {}
+# Used to debug the package, if progressDebug is true
+debug = -> console.log.apply console, arguments if Router.current().lookupOption 'progressDebug'
 
-	# Set our @options, by extending our old ones - Can be called multiple times
-	@configure : (options = {}) ->
-		if _.isObject options
-			_.extend @options, options
-			@currentOptions = _.clone @options
+Template.__IronRouterProgress__.created = ->
+	self = @
+
+	@ticker  = false
+	@delay   = false
+	@started = false
+	@loading = new ReactiveVar false
+	@spinner = new ReactiveVar false
+	@done    = new ReactiveVar false
+	@percent = new ReactiveVar false
+
+	@functions =
+		reset : (element) ->
+			debug 'Reset'
+
+			self.functions.stop()
+
+			# Reset our variables
+			self.loading.set false
+			self.done.set    false
+			self.percent.set 0
+			self.started =   false
+
+			element.offsetWidth = element.offsetWidth if element
+
+			self
+
+		start : (element) ->
+			debug 'Start'
+
+			# Reset our progress
+			self.functions.reset element
+
+			# Update the spinner status, if it changed
+			self.spinner.set Router.current().lookupOption('progressSpinner') or false
+
+			self.loading.set true
+
+			# If we have a delay, wait with the progress
+			delay = Router.current().lookupOption 'progressDelay'
+			if delay > 0
+				debug 'Delayed'
+				self.delay = Meteor.setTimeout ->
+					self.started = true
+					self.functions.progress()
+					self.functions.tick()
+				, delay
+			else
+				debug 'Not delayed'
+				self.started = true
+				self.functions.progress()
+				self.functions.tick()
+
+			self
+
+		progress : (progress = false) ->
+			debug 'Progress'
+
+			# XX We need a better random number generation here
+			percent    = self.percent.get()
+			percentNew = percent + if progress then progress else (100 - percent) * (Math.random() * 0.45 + 0.05) | 0
+
+			if percentNew >= 100
+				self.functions.done()
+			else
+				self.percent.set percentNew
+				self.functions.tick()
+
+			self
+
+		tick : ->
+			debug 'Tick'
+
+			if Router.current().lookupOption 'progressTick'
+				debug 'starting new ticker'
+				if self.ticker
+					Meteor.clearTimeout self.ticker
+					self.ticker = false
+
+				self.ticker = Meteor.setTimeout ->
+					self.ticker = false
+					self.functions.progress()
+				, Math.random() * 750 + 750
+			else
+				debug 'Not starting ticker'
+
+			self
+
+		done : ->
+			debug 'Done'
+
+			self.functions.stop()
+
+			if not self.started
+				self.functions.reset()
+			else
+				_.defer ->
+					self.done.set true
+				self.loading.set true
+				self.percent.set 100
+			self
+
+		stop : ->
+			debug 'Stop'
+
+			# Clear the timers, if we have any
+			if self.ticker
+				Meteor.clearTimeout self.ticker
+				self.ticker = false
+			if self.delay
+				Meteor.clearTimeout self.delay
+				self.delay = false
+
+			self
+
+	Router.load ->
+		debug 'IR:load'
+		element = self.find '*'
+		self.functions.start element
+
+		@next()
 		@
 
-	@prepare : ->
-		return if @isReady
-
-		@element = $ if _.isFunction @options.element then @options.element.call @ else @options.element
-
-		# When the transition ends, and we're actually done with the progres, simply reset it
-		@element.on 'transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', (e) =>
-			# Only reset, if this is the last transition, and that it's not a psuedo selector, such as `:before` and `:after`
-			# Due to the open nature, of the CSS, I want people to be able to do whatever they like, and as such
-			# simply expecting opacity to reach zero, or specific propertyName to execute won't suffice
-			# A more elegant solution should be added, as not all browsers may support transition-property
-			# witout their vendor prefixes
-			@reset() if e.originalEvent.pseudoElement is '' and e.originalEvent.propertyName is _.last @element.css('transition-property').split ', '
-
-		@isReady = true
-		$('body').append @element
+	Router.unload ->
+		debug 'IR:unload'
+		self.functions.reset()
 		@
 
-	# Usually called by @start, but can also be called to simply stop the progress
-	@reset : ->
-		if @isReady
-			clearTimeout @ticker
-			clearTimeout @delay
-			@percent = 0
-			@isDone  = false
-			
-			@currentOptions.reset.call @
+	Router.onRun ->
+		debug 'IR:run'
+		self.loading.set true
+		@next()
 		@
 
-	# Starts a new progress
-	@start : (options = {}) ->
-		@currentOptions = _.extend {}, @options, options if _.isObject options
-
-		if @isReady
-			@reset()
-			if @currentOptions.enabled
-				# If we have a delay set, wait with running _start
-				if @currentOptions.delay and @currentOptions.delay > 0
-					@delay = setTimeout =>
-						@_start()
-					, @currentOptions.delay
-				else
-					@_start()
+	Router.onRerun ->
+		debug 'IR:re-run'
+		@next()
 		@
 
-	@_start : ->
-		@delay = false
-		@progress()
-
-		@tick() if @currentOptions.tick
-
-	@tick : ->
-		@ticker = setTimeout =>
-			@progress()
-			@tick()
-		, Math.random() * 750 + 750
+	Router.onBeforeAction ->
+		debug 'IR:before'
+		if @ready()
+			self.functions.done()
+			self.functions.stop()
+			@next()
+		else
+			self.functions.progress()
 		@
 
-	# Adds `progress` or a random percent to the progress bar
-	@progress : (progress = false) ->
-		# Don't tick, if we're not enabled, or there's an active delay
-		return @ if not @currentOptions.enabled
-
-		# XX We need a better random number generation here
-		@percent += if progress then progress else (100 - @percent) * (Math.random() * 0.45 + 0.05) | 0
-
-		# If we have a delay, simply return past this point
-		return if @delay
-
-		# If the progress is 100% or more, set it to be done
-		return @done() if @percent >= 100
-
-		@currentOptions.progress.call @
+	Router.onAfterAction ->
+		debug 'IR:after'
 		@
 
-	# Completes the progress by setting the progress to 100%
-	@done : ->
-		if @delay
-			clearTimeout @delay
-			@delay = false
-
-		if @isReady and not @isDone
-			clearTimeout @ticker
-
-			@percent = 100
-			@isDone  = true
-
-			@currentOptions.done.call @
+	Router.onStop ->
+		debug 'IR:stop'
+		self.functions.reset()
 		@
 
-# Default options
-IronRouterProgress.configure
-	element : """<div id="iron-router-progress"></div>"""
-	spinner : true
-	tick    : true
-	enabled : true
-	delay   : false
+Template.__IronRouterProgress__.helpers
+	data     : -> Template.instance()
+	template : ->
+		# If progress is disabled in general, don't show a template
+		return null if not Router.current()?.lookupOption 'progress'
 
-	# Callbacks
-	# Resets the transition
-	reset : ->
-		@element.removeClass 'loading done'
-		@element.css 'width', '0%'
-		@element.toggleClass 'spinner', @currentOptions.spinner
+		if Template.instance().loading.get() then '__IronRouterProgressDefault__' else null
 
-		# Hack to reset the CSS transition
-		@element[0].offsetWidth = @element[0].offsetWidth
-		@
+Template.__IronRouterProgressDefault__.rendered = ->
+	# Used for the CSS reset
+	@element = @$ '#iron-router-progress'
 
-	progress : ->
-		@element.addClass 'loading'
-		@element.removeClass 'done'
-		@element.css 'width', "#{@percent}%" if @element
-		@
+Template.__IronRouterProgressDefault__.helpers
+	cssClass : ->
+		classes = []
 
-	done : ->
-		@element.addClass 'done'
-		@element.css 'width', '100%'
-		@
+		classes.push 'loading' if @loading.get()
+		classes.push 'spinner' if @spinner.get()
+		classes.push 'done'    if @done.get()
 
-Router.onRun ->
-	# Take the options from the route, if any
-	IronRouterProgress.start @route.options?.progress or {}
-	@
+		classes.join ' '
+	cssStyle : ->
+		styles = []
+		
+		styles.push "width:#{@percent.get()}%" if @percent.get()
 
-Router.onBeforeAction (pause) ->
-	if @ready()
-		IronRouterProgress.done()
-	else
-		IronRouterProgress.progress()
+		styles.join ';'
 
-		# XX Temporary fix, when you want to show your loading template
-		loadingTemplate = @lookupProperty 'loadingTemplate'
-		if loadingTemplate
-			@render loadingTemplate
-			@renderRegions()
+Template.__IronRouterProgressDefault__.events
+	'transitionend #iron-router-progress, webkitTransitionEnd #iron-router-progress, oTransitionEnd #iron-router-progress, otransitionend #iron-router-progress, MSTransitionEnd #iron-router-progress' : (e, template) ->
+		# Only reset, if this is the last transition, and that it's not a psuedo selector, such as `:before` and `:after`
+		# Due to the open nature, of the CSS, I want people to be able to do whatever they like, and as such
+		# simply expecting opacity to reach zero, or specific propertyName to execute won't suffice
+		# A more elegant solution should be added, as not all browsers may support transition-property
+		# witout their vendor prefixes
 
-		pause()
-	@
+		if e.originalEvent.pseudoElement is '' and e.originalEvent.propertyName is _.last template.element.css('transition-property').split ', '
+			debug 'transitionend'
+			data = Template.currentData()
+			data.done.set    false
+			data.loading.set false
+			data.percent.set false
 
-Router.onAfterAction ->
-	IronRouterProgress.done()
-	@
-
-Router.onStop ->
-	IronRouterProgress.reset()
-	@
-
-# Prepare our DOM-element when jQuery is ready
-$ -> IronRouterProgress.prepare()
+# Prepare our DOM-element
+Meteor.startup ->
+	layout = new Iron.Layout
+		template : '__IronRouterProgress__'
+	layout.insert
+		el : document.body

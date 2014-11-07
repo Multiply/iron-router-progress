@@ -101,3 +101,27 @@ Router.configure
 Router.route '/example',
 	progressDelay : false
 ```
+
+### Debugging
+If you want to debug IRP, you may enable the `progressDebug` option.
+
+Global debugging:
+```coffee
+Router.configure
+	progressDebug : true
+```
+
+Route debugging:
+```coffee
+Router.route '/example',
+	progressDebug : true
+```
+
+You can enable it globally, and disable it for specific routes like this:
+```coffee
+Router.configure
+	progressDebug : true
+
+Router.route '/example',
+	progressDebug : false
+```

@@ -70,7 +70,7 @@ Router.configure
 	progress : false
 
 Router.route '/example',
-	progressEnabled : true
+	progress : true
 ```
 
 Or if you just want it disabled for certain routes:

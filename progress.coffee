@@ -153,9 +153,9 @@ Template.__IronRouterProgress__.created = ->
 		if @ready()
 			self.functions.done()
 			self.functions.stop()
-			@next()
 		else
 			self.functions.progress()
+		@next()
 		@
 
 	Router.onAfterAction ->

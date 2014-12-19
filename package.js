@@ -1,6 +1,6 @@
 Package.describe({
 	name    : 'multiply:iron-router-progress',
-	version : '1.0.0',
+	version : '1.0.1',
 	summary : 'Progressbar for iron:router',
 	git     : 'https://github.com/Multiply/iron-router-progress.git'
 });

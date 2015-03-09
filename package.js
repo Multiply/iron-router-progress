@@ -15,6 +15,7 @@ Package.onUse(function (api) {
 		'templating',
 		'jquery',
 		'reactive-var',
+		'tracker',
 		'iron:router@1.0.0',
 		'iron:layout@1.0.0'
 	], 'client');

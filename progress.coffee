@@ -150,11 +150,13 @@ Template.__IronRouterProgress__.created = ->
 
 	Router.onBeforeAction ->
 		debug 'IR:before'
-		if @ready()
-			self.functions.done()
-			self.functions.stop()
-		else
-			self.functions.progress()
+		Tracker.autorun ()=>
+			if @ready()
+				self.functions.done()
+				self.functions.stop()
+			else
+				self.functions.progress()
+			return
 		@next()
 		@
 
@@ -190,7 +192,7 @@ Template.__IronRouterProgressDefault__.helpers
 		classes.join ' '
 	cssStyle : ->
 		styles = []
-		
+
 		styles.push "width:#{@percent.get()}%" if @percent.get()
 
 		styles.join ';'
